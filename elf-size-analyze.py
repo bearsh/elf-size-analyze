@@ -105,6 +105,8 @@ sections must have ALLOC flag and: for RAM - have WRITE flag, for ROM - not have
                                 help='disable colored output')
     printing_group.add_argument('--no-cumulative-size', action='store_true',
                                 help='disable printing of cumulative sizes for paths')
+    printing_group.add_argument('--no-percentage', action='store_true',
+                                help='disable printing of relative size in percentage')
     printing_group.add_argument('--no-totals', action='store_true',
                                 help='disable printing the total symbols size')
 
@@ -836,7 +838,8 @@ class SymbolsTreeByPath:
                 print(self.string)
 
     def generate_printable_lines(self, *, max_width=80, min_size=0, header=None, indent=2,
-                                 colors=True, alternating_colors=False, trim=True, human_readable=False):
+                                 colors=True, alternating_colors=False, trim=True, human_readable=False,
+                                 percentage=True):
         """
         Creates printable output in form of Protoline objects.
         Handles RIDICULLOUSLY complex printing. Someone could probably implement it easier.
@@ -845,9 +848,9 @@ class SymbolsTreeByPath:
         protolines = self._generate_protolines(min_size)
         self._add_field_strings(protolines, indent, human_readable)
         # formatting string
-        h_fmt = '{:{s0}}   {:{s1}}   {:{s2}}'
-        fmt = '{:{s0}}   {:>{s1}}   {:>{s2}}'
-        t_fmt = '{:{s0}}   {:>{s1}}   {:>{s2}}'
+        h_fmt = '{:{s0}}   {:{s1}}' + ('   {:{s2}}' if percentage == True else '')
+        fmt = '{:{s0}}   {:>{s1}}' + ('   {:>{s2}}' if percentage == True else '')
+        t_fmt = '{:{s0}}   {:>{s1}}' + ('   {:>{s2}}' if percentage == True else '')
         table_headers = ('Symbol', 'Size', '%')
         # calculate sizes
         field_sizes = self._calculate_field_sizes(protolines, max_width=max_width,
@@ -1034,7 +1037,8 @@ def main():
         min_size = math.inf if args.files_only else args.min_size
         lines = tree.generate_printable_lines(
             header=header, colors=not args.no_color, human_readable=args.human_readable,
-            max_width=args.max_width, min_size=min_size, alternating_colors=args.alternating_colors)
+            max_width=args.max_width, min_size=min_size, alternating_colors=args.alternating_colors,
+            percentage=not args.no_percentage)
         for line in lines:
             line.print()
 
