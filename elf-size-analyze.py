@@ -982,6 +982,10 @@ def main():
     result = False
     args = parse_args()
 
+    # detect redirection/pipe and disable color
+    if not sys.stdout.isatty():
+        args.no_color = True
+
     # adjust verbosity
     if args.verbose:
         level = log.level - 10 * args.verbose
